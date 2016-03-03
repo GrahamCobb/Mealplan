@@ -5,6 +5,8 @@ import QtQuick.Controls 1.4
 
 Window {
     visible: true
+    minimumWidth: mealTable.implicitWidth
+    minimumHeight: mealTable.implicitHeight
 
     MouseArea {
         anchors.fill: parent
