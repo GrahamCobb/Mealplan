@@ -40,36 +40,43 @@ Window {
         // Column Titles
         Label {
             text: "Monday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colMon
         }
         Label {
             text: "Tuesday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colTue
         }
         Label {
             text: "Wednesday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colWed
         }
         Label {
             text: "Thursday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colThu
         }
         Label {
             text: "Friday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colFri
         }
         Label {
             text: "Saturday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colSat
         }
         Label {
             text: "Sunday"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowTitle
             Layout.column: mealTable.colSun
         }
@@ -99,42 +106,69 @@ Window {
         // Dates
         Text {
             id: "dateMon"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colMon
         }
         Text {
             id: "dateTue"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colTue
         }
         Text {
             id: "dateWed"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colWed
         }
         Text {
             id: "dateThu"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colThu
         }
         Text {
             id: "dateFri"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colFri
         }
         Text {
             id: "dateSat"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colSat
         }
         Text {
             id: "dateSun"
+            Layout.alignment: Qt.AlignHCenter
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colSun
         }
-        function setDates(monday) {
-            // TODO
-            console.log("should be setting dates from " + monday)
+        function setDates() {
+            // Note: this function relies on the fact that Date.setDate accepts out of range date-of-month
+            var d = new Date();
+            var dow;
+
+            // Find last Monday
+            dow = d.getDay();
+            if (dow == 0) dow = 7;
+            d.setDate(d.getDate() - (dow-1));
+
+            dateMon.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+            d.setDate(d.getDate()+1);
+            dateTue.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+            d.setDate(d.getDate()+1);
+            dateWed.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+            d.setDate(d.getDate()+1);
+            dateThu.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+            d.setDate(d.getDate()+1);
+            dateFri.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+            d.setDate(d.getDate()+1);
+            dateSat.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+            d.setDate(d.getDate()+1);
+            dateSun.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
         }
 
         // Sarah
@@ -282,5 +316,7 @@ Window {
             Layout.row: mealTable.rowDinner
             Layout.column: mealTable.colSun
         }
+
+        Component.onCompleted: setDates();
     }
 }
