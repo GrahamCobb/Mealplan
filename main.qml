@@ -2,16 +2,38 @@ import QtQuick 2.5
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls 1.4
+import QtQuick.LocalStorage 2.0
 
 Window {
     visible: true
     minimumWidth: mealTable.implicitWidth
     minimumHeight: mealTable.implicitHeight
 
+    function save(data) {
+        var d = data.startDate;
+        var db = LocalStorage.openDatabaseSync("MealPlan", "1.0", "Meal Plan application data");
+        db.transaction(
+                    function(tx) {
+                        // Create the database if it doesn't already exist
+                        tx.executeSql('CREATE TABLE IF NOT EXISTS History(startDate TEXT, data TEXT, PRIMARY KEY (startDate))');
+                        // Insert data to save
+                        tx.executeSql('INSERT OR REPLACE INTO History VALUES(?, ?)', [ d, JSON.stringify(data)]);
+
+                        // Show all data
+                        //var rs = tx.executeSql('SELECT * FROM History');
+                        //var r = "Database: " + rs.rows.length + " rows\n"
+                        //for(var i = 0; i < rs.rows.length; i++) {
+                        //    r += rs.rows.item(i).startDate + ": " + rs.rows.item(i).data + "\n"
+                        //}
+                        //console.log(r);
+                    }
+        );
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            console.log(JSON.stringify(mealTable.to_object()));
+            save(mealTable.to_object());
             Qt.quit();
         }
     }
@@ -22,7 +44,7 @@ Window {
         columns: 8
         anchors.fill: parent
         signal dataChanged
-        onDataChanged: console.log("onDataChanged: " + JSON.stringify(mealTable.to_object()))
+        onDataChanged: save(mealTable.to_object())
 
         // Row and Column numbers (in case I add or remove something)
         property int rowTitle: 1

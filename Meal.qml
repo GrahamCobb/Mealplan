@@ -21,11 +21,12 @@ Item {
         rows: 2
         columns: 2
         anchors.centerIn: parent
+        signal dataChanged
 
         MealCB {
             id: checkS
             text: "S"
-            onCheckedChanged: parent.parent.dataChanged()
+            onCheckedChanged: parent.dataChanged()
             Layout.row: 1
             Layout.column: 1
             Layout.alignment: Qt.AlignLeft + Qt.AlignTop
@@ -36,7 +37,7 @@ Item {
         MealCB {
             id: checkR
             text: "R"
-            onCheckedChanged: parent.parent.dataChanged()
+            onCheckedChanged: parent.dataChanged()
             Layout.row: 1
             Layout.column: 2
             Layout.alignment: Qt.AlignRight + Qt.AlignTop
@@ -48,13 +49,14 @@ Item {
             id: theText
             anchors.centerIn: parent
             text: "a"
-            onEditingFinished: parent.parent.dataChanged
+            onEditingFinished: parent.dataChanged()
             Layout.row: 2
             Layout.column: 1
             Layout.columnSpan: 2
             Layout.alignment: Qt.AlignBottom
             Layout.topMargin: 20
         }
+        onDataChanged: parent.dataChanged()
     }
 
     function to_object() {
