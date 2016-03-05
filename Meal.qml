@@ -11,6 +11,10 @@ Item {
     implicitWidth: theText.width
 
     property alias text: theText.text
+    property alias checkedS: checkS.checked
+    property alias checkedR: checkR.checked
+
+    signal dataChanged
 
     GridLayout {
         id: mealGrid
@@ -21,6 +25,7 @@ Item {
         MealCB {
             id: checkS
             text: "S"
+            onCheckedChanged: parent.parent.dataChanged()
             Layout.row: 1
             Layout.column: 1
             Layout.alignment: Qt.AlignLeft + Qt.AlignTop
@@ -31,6 +36,7 @@ Item {
         MealCB {
             id: checkR
             text: "R"
+            onCheckedChanged: parent.parent.dataChanged()
             Layout.row: 1
             Layout.column: 2
             Layout.alignment: Qt.AlignRight + Qt.AlignTop
@@ -42,12 +48,23 @@ Item {
             id: theText
             anchors.centerIn: parent
             text: "a"
+            onEditingFinished: parent.parent.dataChanged
             Layout.row: 2
             Layout.column: 1
             Layout.columnSpan: 2
             Layout.alignment: Qt.AlignBottom
             Layout.topMargin: 20
         }
+    }
+
+    function to_object() {
+        var data = {};
+
+        data.checkedS = checkedS;
+        data.checkedR = checkedR;
+        data.text = text;
+
+        return data;
     }
 
     //For debugging Layout problems

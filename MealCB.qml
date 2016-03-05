@@ -9,6 +9,7 @@ Item {
     implicitWidth: mealCB.width
 
     property alias text: mealCB.text
+    property alias checked: mealCB.checked
 
     CheckBox {
         id: mealCB
