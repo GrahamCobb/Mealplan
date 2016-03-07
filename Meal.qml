@@ -68,6 +68,11 @@ Item {
 
         return data;
     }
+    function from_object(data) {
+        if ("checkedS" in data) checkedS = data.checkedS;
+        if ("checkedR" in data) checkedR = data.checkedR;
+        if ("text" in data) text = data.text;
+    }
 
     //For debugging Layout problems
     //Component.onCompleted: print(x, y, width, height, implicitWidth, implicitHeight)

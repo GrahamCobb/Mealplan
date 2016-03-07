@@ -30,6 +30,27 @@ Window {
         );
     }
 
+    function load(date) {
+        var data = null;
+        var db = LocalStorage.openDatabaseSync("MealPlan", "1.0", "Meal Plan application data");
+        db.readTransaction(
+                    function(tx) {
+                        // Read record for supplied date
+                        var rs = tx.executeSql("SELECT * FROM History WHERE startDate = ?", [ date ]);
+                        if (rs.rows.length == 0) {data = null;}
+                        else if (rs.rows.length == 1) {data = JSON.parse(rs.rows.item(0).data);}
+                        else {
+                            var r = "load: " + rs.rows.length + " rows returned\n";
+                            for(var i = 0; i < rs.rows.length; i++) {
+                                r += rs.rows.item(i).startDate + ": " + rs.rows.item(i).data + "\n"
+                            }
+                            console.log(r);
+                        }
+                    }
+        )
+        return data;
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -172,15 +193,22 @@ Window {
             Layout.row: mealTable.rowDate
             Layout.column: mealTable.colSun
         }
-        function setDates() {
-            // Note: this function relies on the fact that Date.setDate accepts out of range date-of-month
+        function findMonday(date) {
             var d = new Date();
+            console.log("date: " + d.toLocaleDateString());
             var dow;
 
             // Find last Monday
             dow = d.getDay();
             if (dow == 0) dow = 7;
             d.setDate(d.getDate() - (dow-1));
+            return d;
+        }
+
+        function setDates(date) {
+            // Note: this function relies on the fact that Date.setDate accepts out of range date-of-month
+            var mon = findMonday(date);
+            var d = new Date(mon);
 
             dateMon.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
             d.setDate(d.getDate()+1);
@@ -195,6 +223,8 @@ Window {
             dateSat.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
             d.setDate(d.getDate()+1);
             dateSun.text = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+
+            return mon;
         }
 
         // Sarah
@@ -413,9 +443,52 @@ Window {
 
             return data;
         }
+        function from_object(data) {
+            console.log(JSON.stringify(data));
+            // Start Date
+            setDates(data.startDate);
+
+            // Sarah
+            if ("sarahMon" in data) sarahMon.text = data.sarahMon;
+            if ("sarahTue" in data) sarahTue.text = data.sarahTue;
+            if ("sarahWed" in data) sarahWed.text = data.sarahWed;
+            if ("sarahThu" in data) sarahThu.text = data.sarahThu;
+            if ("sarahFri" in data) sarahFri.text = data.sarahFri;
+            if ("sarahSat" in data) sarahSat.text = data.sarahSat;
+            if ("sarahSun" in data) sarahSun.text = data.sarahSun;
+
+            //Meals
+            if ("breakfastMon" in data) breakfastMon.from_object(data.breakfastMon);
+            if ("breakfastTue" in data) breakfastTue.from_object(data.breakfastTue);
+            if ("breakfastWed" in data) breakfastWed.from_object(data.breakfastWed);
+            if ("breakfastThu" in data) breakfastThu.from_object(data.breakfastThu);
+            if ("breakfastFri" in data) breakfastFri.from_object(data.breakfastFri);
+            if ("breakfastSat" in data) breakfastSat.from_object(data.breakfastSat);
+            if ("breakfastSun" in data) breakfastSun.from_object(data.breakfastSun);
+
+            if ("lunchMon" in data) lunchMon.from_object(data.lunchMon);
+            if ("lunchTue" in data) lunchTue.from_object(data.lunchTue);
+            if ("lunchWed" in data) lunchWed.from_object(data.lunchWed);
+            if ("lunchThu" in data) lunchThu.from_object(data.lunchThu);
+            if ("lunchFri" in data) lunchFri.from_object(data.lunchFri);
+            if ("lunchSat" in data) lunchSat.from_object(data.lunchSat);
+            if ("lunchSun" in data) lunchSun.from_object(data.lunchSun);
+
+            if ("dinnerMon" in data) dinnerMon.from_object(data.dinnerMon);
+            if ("dinnerTue" in data) dinnerTue.from_object(data.dinnerTue);
+            if ("dinnerWed" in data) dinnerWed.from_object(data.dinnerWed);
+            if ("dinnerThu" in data) dinnerThu.from_object(data.dinnerThu);
+            if ("dinnerFri" in data) dinnerFri.from_object(data.dinnerFri);
+            if ("dinnerSat" in data) dinnerSat.from_object(data.dinnerSat);
+            if ("dinnerSun" in data) dinnerSun.from_object(data.dinnerSun);
+        }
 
         Component.onCompleted: {
-            setDates();
+            var d = findMonday();
+            console.log("date = " + d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear());
+            var data = load(d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear());
+            if (data) mealTable.from_object(data);
+            save(mealTable.to_object());
         }
     }
 }
