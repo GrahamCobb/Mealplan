@@ -9,30 +9,53 @@ Window {
     minimumWidth: mealTable.implicitWidth
     minimumHeight: mealTable.implicitHeight
 
+    property string version: "0.3"
+    property string dbName: "MealPlan"
+    property string dbVersion: "1.0"
+    property string dbDescription: "Meal Plan application data"
+
     function save(data) {
+        var print_all_records = 0;
         var d = data.startDate;
-        var db = LocalStorage.openDatabaseSync("MealPlan", "1.0", "Meal Plan application data");
+        if (d == "") {
+            console.log("%%%% Attempt to save data with no date %%%%\n");
+            return;
+        }
+
+        //console.log("Saving date for date " + d + "\n");
+        var db = LocalStorage.openDatabaseSync(dbName, dbVersion, dbDescription);
         db.transaction(
                     function(tx) {
                         // Create the database if it doesn't already exist
                         tx.executeSql('CREATE TABLE IF NOT EXISTS History(startDate TEXT, data TEXT, PRIMARY KEY (startDate))');
+                        // Tidy up
+                        //tx.executeSql('DELETE FROM History WHERE startDate IS NULL');
+
                         // Insert data to save
                         tx.executeSql('INSERT OR REPLACE INTO History VALUES(?, ?)', [ d, JSON.stringify(data)]);
 
-                        // Show all data
-                        //var rs = tx.executeSql('SELECT * FROM History');
-                        //var r = "Database: " + rs.rows.length + " rows\n"
-                        //for(var i = 0; i < rs.rows.length; i++) {
-                        //    r += rs.rows.item(i).startDate + ": " + rs.rows.item(i).data + "\n"
-                        //}
-                        //console.log(r);
+                        // Show all data (debugging option)
+                        if (print_all_records) {
+                            var rs = tx.executeSql('SELECT * FROM History');
+                            var r = "Database: " + rs.rows.length + " rows\n"
+                            for(var i = 0; i < rs.rows.length; i++) {
+                                r += rs.rows.item(i).startDate + ": " + rs.rows.item(i).data + "\n"
+                            }
+                            console.log(r);
+                        }
                     }
         );
     }
 
     function load(date) {
         var data = null;
-        var db = LocalStorage.openDatabaseSync("MealPlan", "1.0", "Meal Plan application data");
+        var db = LocalStorage.openDatabaseSync(dbName, dbVersion, dbDescription);
+
+        if (date == "") {
+            console.log("%%%% Attempt to load data with no date %%%%\n");
+            return null;
+        }
+
         db.readTransaction(
                     function(tx) {
                         // Read record for supplied date
@@ -40,7 +63,7 @@ Window {
                         if (rs.rows.length == 0) {data = null;}
                         else if (rs.rows.length == 1) {data = JSON.parse(rs.rows.item(0).data);}
                         else {
-                            var r = "load: " + rs.rows.length + " rows returned\n";
+                            var r = "%%%% Multiple records found: " + rs.rows.length + " rows returned %%%%\n";
                             for(var i = 0; i < rs.rows.length; i++) {
                                 r += rs.rows.item(i).startDate + ": " + rs.rows.item(i).data + "\n"
                             }
@@ -195,7 +218,7 @@ Window {
         }
         function findMonday(date) {
             var d = new Date();
-            console.log("date: " + d.toLocaleDateString());
+            //console.log("date: " + d.toLocaleDateString());
             var dow;
 
             // Find last Monday
@@ -444,7 +467,7 @@ Window {
             return data;
         }
         function from_object(data) {
-            console.log(JSON.stringify(data));
+            //console.log(JSON.stringify(data));
             // Start Date
             setDates(data.startDate);
 
@@ -484,10 +507,12 @@ Window {
         }
 
         Component.onCompleted: {
+            console.log("MealPlan V" + version);
             var d = findMonday();
-            console.log("date = " + d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear());
+            //console.log("date = " + d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear());
             var data = load(d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear());
-            if (data) mealTable.from_object(data);
+            if (data) mealTable.from_object(data)
+            else setDates(d);
             save(mealTable.to_object());
         }
     }

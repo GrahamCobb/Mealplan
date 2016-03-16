@@ -48,7 +48,6 @@ Item {
         TextField {
             id: theText
             anchors.centerIn: parent
-            text: "a"
             onEditingFinished: parent.dataChanged()
             Layout.row: 2
             Layout.column: 1
