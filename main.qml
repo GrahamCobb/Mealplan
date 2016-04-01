@@ -9,13 +9,30 @@ Window {
     minimumWidth: mealTable.implicitWidth
     minimumHeight: mealTable.implicitHeight
 
-    property string version: "0.3"
+    property string version: "0.4"
     property string dbName: "MealPlan"
     property string dbVersion: "1.0"
     property string dbDescription: "Meal Plan application data"
+    property string dbTableName: "History"
+
+    // Database access
+    function openCreateUpgradeDB() {
+        // Open the LocalStorage database
+        // Handle creating or upgrading the table if necessary
+        var db = LocalStorage.openDatabaseSync(dbName, dbVersion, dbDescription);
+        db.transaction(
+                    function(tx) {
+                        // Create the table if it doesn't already exist
+                        tx.executeSql('CREATE TABLE IF NOT EXISTS ' + dbTableName + '(startDate TEXT, data TEXT, PRIMARY KEY (startDate))');
+                        // Tidy up
+                        //tx.executeSql('DELETE FROM ' + dbTableName + ' WHERE startDate IS NULL');
+                    }
+        );
+        return db;
+    }
 
     function save(data) {
-        var print_all_records = 0;
+        var print_all_records = 0; // Debugging option
         var d = data.startDate;
         if (d == "") {
             console.log("%%%% Attempt to save data with no date %%%%\n");
@@ -23,20 +40,15 @@ Window {
         }
 
         //console.log("Saving date for date " + d + "\n");
-        var db = LocalStorage.openDatabaseSync(dbName, dbVersion, dbDescription);
+        var db = openCreateUpgradeDB();
         db.transaction(
                     function(tx) {
-                        // Create the database if it doesn't already exist
-                        tx.executeSql('CREATE TABLE IF NOT EXISTS History(startDate TEXT, data TEXT, PRIMARY KEY (startDate))');
-                        // Tidy up
-                        //tx.executeSql('DELETE FROM History WHERE startDate IS NULL');
-
                         // Insert data to save
-                        tx.executeSql('INSERT OR REPLACE INTO History VALUES(?, ?)', [ d, JSON.stringify(data)]);
+                        tx.executeSql('INSERT OR REPLACE INTO ' + dbTableName + ' VALUES(?, ?)', [ d, JSON.stringify(data)]);
 
                         // Show all data (debugging option)
                         if (print_all_records) {
-                            var rs = tx.executeSql('SELECT * FROM History');
+                            var rs = tx.executeSql('SELECT * FROM ' + dbTableName);
                             var r = "Database: " + rs.rows.length + " rows\n"
                             for(var i = 0; i < rs.rows.length; i++) {
                                 r += rs.rows.item(i).startDate + ": " + rs.rows.item(i).data + "\n"
@@ -49,7 +61,7 @@ Window {
 
     function load(date) {
         var data = null;
-        var db = LocalStorage.openDatabaseSync(dbName, dbVersion, dbDescription);
+        var db = openCreateUpgradeDB();
 
         if (date == "") {
             console.log("%%%% Attempt to load data with no date %%%%\n");
@@ -59,7 +71,7 @@ Window {
         db.readTransaction(
                     function(tx) {
                         // Read record for supplied date
-                        var rs = tx.executeSql("SELECT * FROM History WHERE startDate = ?", [ date ]);
+                        var rs = tx.executeSql('SELECT * FROM ' + dbTableName + ' WHERE startDate = ?', [ date ]);
                         if (rs.rows.length == 0) {data = null;}
                         else if (rs.rows.length == 1) {data = JSON.parse(rs.rows.item(0).data);}
                         else {
