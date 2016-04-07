@@ -7,8 +7,8 @@ import QtQuick.Controls.Styles 1.4
 Item {
     // Needed for Layout to function
     // Note: this means the TextField must have a size, not anchors.fill: parent
-    implicitHeight: theText.height + checkS.height
-    implicitWidth: theText.width
+    implicitHeight: 20 + theText.implicitHeight + checkS.implicitHeight + 2
+    implicitWidth: Math.max(theText.implicitWidth, 2 * (checkS.implicitWidth + 10))
 
     property alias text: theText.text
     property alias checkedS: checkS.checked
@@ -20,7 +20,8 @@ Item {
         id: mealGrid
         rows: 2
         columns: 2
-        anchors.centerIn: parent
+//        anchors.centerIn: parent
+        anchors.fill: parent
         signal dataChanged
 
         MealCB {
@@ -47,13 +48,20 @@ Item {
 
         TextField {
             id: theText
-            anchors.centerIn: parent
+            anchors.fill: parent
+            anchors.topMargin: 40
+//            anchors.centerIn: parent
             onEditingFinished: parent.dataChanged()
             Layout.row: 2
             Layout.column: 1
             Layout.columnSpan: 2
             Layout.alignment: Qt.AlignBottom
+            Layout.fillHeight: true
+            Layout.fillWidth: true
             Layout.topMargin: 20
+
+            //For debugging Layout problems
+            //Component.onCompleted: print("theText:", x, y, width, height)
         }
         onDataChanged: parent.dataChanged()
     }
@@ -74,5 +82,5 @@ Item {
     }
 
     //For debugging Layout problems
-    //Component.onCompleted: print(x, y, width, height, implicitWidth, implicitHeight)
+    //Component.onCompleted: print("Meal:", x, y, width, height, implicitWidth, implicitHeight)
 }

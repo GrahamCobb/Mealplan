@@ -27,7 +27,7 @@ Item {
         }
     }
     //For debugging Layout problems
-    //Component.onCompleted: print(x, y, width, height, implicitWidth, implicitHeight)
+    //Component.onCompleted: print("MealCB:", x, y, width, height, implicitWidth, implicitHeight)
 }
 
 
